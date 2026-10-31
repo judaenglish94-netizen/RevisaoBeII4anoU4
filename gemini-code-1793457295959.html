@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JM English - Living & Non-Living Things Quiz (Year 4)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka:wght@600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --space-dark: #050b14;
+      --space-blue: #0b192e;
+      --accent-blue: #0284c7;
+      --dark-blue-text: #0b192e;
+      --card-bg: rgba(13, 27, 42, 0.94);
+      --card-border: rgba(255, 255, 255, 0.85);
+      --text-main: #f8f9fa;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nunito', sans-serif; }
+
+    body {
+      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+      min-height: 100vh;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: 
+        radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 40px 70px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 90px 40px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 160px 120px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 230px 190px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 300px 80px, #ffffff, rgba(0,0,0,0));
+      background-repeat: repeat;
+      background-size: 350px 350px;
+      opacity: 0.5;
+      z-index: 0;
+    }
+
+    .brand-header {
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .custom-logo {
+      max-width: 180px;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 6px 15px rgba(0,0,0,0.6));
+      transition: transform 0.3s ease;
+    }
+
+    .custom-logo:hover { transform: scale(1.03); }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      left: -320px;
+      width: 300px;
+      height: 100%;
+      background: #0f172a;
+      box-shadow: 5px 0 25px rgba(0,0,0,0.8);
+      z-index: 1000;
+      transition: left 0.3s ease;
+      padding: 25px 20px;
+      overflow-y: auto;
+      border-right: 2px solid rgba(255,255,255,0.2);
+    }
+    .drawer.open { left: 0; }
+    .drawer-overlay {
+      position: fixed;
+      top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 999;
+      display: none;
+    }
+    .drawer-overlay.open { display: block; }
+
+    .grid-menu {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 15px;
+    }
+    .grid-item {
+      padding: 10px 5px;
+      background: #1e293b;
+      color: #38bdf8;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.2s;
+    }
+    .grid-item:hover { border-color: #38bdf8; background: #334155; }
+    .grid-item.answered { background: #14532d; color: #4ade80; border-color: #22c55e; }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      border: 3px solid var(--card-border);
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(10px);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .menu-btn {
+      background: #1e293b;
+      border: 2px solid #ffffff;
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .menu-btn:hover { background: #334155; transform: translateY(-1px); }
+
+    h1, h2, h3 { font-family: 'Fredoka', sans-serif; color: #ffffff; text-align: center; }
+
+    /* CAIXA DE TEXTO COM BARRA DE ROLAGEM AZUL ESCURO NO DESKTOP E MOBILE */
+    .ref-text-box {
+      background: #ffffff;
+      color: #1e293b;
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border-left: 6px solid #0b192e;
+      line-height: 1.6;
+      font-size: 0.98rem;
+      max-height: 240px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #0b192e #e2e8f0;
+    }
+
+    /* Estilização da Barra de Rolagem Azul Escuro para Navegadores Desktop */
+    .ref-text-box::-webkit-scrollbar {
+      width: 8px;
+    }
+    .ref-text-box::-webkit-scrollbar-track {
+      background: #e2e8f0;
+      border-radius: 8px;
+    }
+    .ref-text-box::-webkit-scrollbar-thumb {
+      background-color: #0b192e;
+      border-radius: 8px;
+    }
+    .ref-text-box::-webkit-scrollbar-thumb:hover {
+      background-color: #0284c7;
+    }
+
+    .ref-text-box h3 {
+      color: var(--dark-blue-text);
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.35rem;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+    .ref-text-box h4 {
+      color: #0284c7;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1.15rem;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+    .ref-text-box p { color: #334155; margin-bottom: 10px; }
+    /* DESTAKES EM AZUL ESCURO CONFORME PEDIDO */
+    .ref-text-box strong { color: var(--dark-blue-text); font-weight: 800; }
+    .ref-text-box em { color: #475569; font-style: italic; }
+
+    .btn {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      padding: 12px 30px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-block;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+    }
+    .btn:hover { background: linear-gradient(135deg, #0369a1 0%, #075985 100%); transform: translateY(-2px); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .options-grid { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+
+    .option-btn {
+      background: rgba(30, 41, 59, 0.7);
+      border: 2px solid #334155;
+      padding: 14px 20px;
+      border-radius: 14px;
+      text-align: left;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #f8f9fa;
+    }
+    .option-btn:hover { border-color: #38bdf8; background: rgba(51, 65, 85, 0.9); }
+    .option-btn.selected { border-color: #38bdf8; background: #0284c7; color: #ffffff; }
+    .option-btn.correct { background: #14532d !important; border-color: #22c55e !important; color: #ffffff !important; }
+    .option-btn.wrong { background: #7f1d1d !important; border-color: #ef4444 !important; color: #ffffff !important; }
+
+    .feedback-box {
+      margin-top: 15px;
+      padding: 16px;
+      border-radius: 14px;
+      font-weight: 600;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .report-card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 2px solid #38bdf8;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: left;
+    }
+    .report-card h3 { color: #38bdf8; text-align: left; margin-bottom: 12px; }
+    .report-card ul { margin-left: 20px; margin-top: 10px; }
+    .report-card li { margin-bottom: 8px; color: #cbd5e1; }
+
+    .nav-actions { display: flex; justify-content: space-between; margin-top: 25px; }
+
+    .progress-bar-wrap {
+      width: 100%;
+      background: #1e293b;
+      height: 10px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 1px solid #334155;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #0284c7);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div class="brand-header">
+  <img src="judalogo.png" alt="JM Logo" class="custom-logo">
+</div>
+
+<div class="drawer-overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="drawer" id="drawer">
+  <h3>Questions Menu</h3>
+  <p style="font-size: 0.85rem; text-align: center; margin-top: 5px; color: var(--text-muted);">Select a question to jump:</p>
+  <div class="grid-menu" id="menu-grid"></div>
+</div>
+
+<div class="container">
+  <div class="top-bar">
+    <button class="menu-btn" onclick="toggleMenu()">☰ Menu</button>
+    <span style="font-weight: 800; color: #38bdf8;" id="tracker-text">Science Quiz</span>
+  </div>
+
+  <!-- TELA INICIAL: APENAS O TEXTO EXPLICATIVO COMPLETO E O BOTÃO START QUIZ -->
+  <div id="start-screen">
+    <h1 style="font-size: 1.8rem; margin-bottom: 15px;">Living and Non-Living Things</h1>
+    
+    <div class="ref-text-box" style="max-height: 340px;">
+      <h3>Living and Non-Living Things (Seres Vivos e Não-Vivos)</h3>
+      
+      <p>No nosso mundo, tudo o que nos cerca pode ser dividido em dois grupos principais: <strong>living things</strong> (seres vivos) e <strong>non-living things</strong> (seres não-vivos).</p>
+      
+      <h4>1. What are Living Things? (O que são Seres Vivos?)</h4>
+      <p>Os <strong>living things</strong> (seres vivos) são organismos que têm vida. Para continuar vivos, eles têm necessidades básicas essenciais: precisam de <strong>water</strong> (água), <strong>food</strong> (comida) e <strong>air</strong> (ar).</p>
+      <p>Além disso, todos os seres vivos possuem características especiais: eles podem <strong>grow</strong> (crescer), <strong>breathe</strong> (respirar ar ou oxigênio), <strong>move</strong> (mover-se por si mesmos) e <strong>reproduce</strong> (reproduzir-se / ter filhotes).</p>
+      <p>Exemplos de seres vivos: <strong>animals</strong> (animais como cachorros, pássaros e peixes), <strong>plants</strong> (plantas e árvores) e <strong>humans</strong> (humanos/pessoas).</p>
+      <p><em>Frases de exemplo: Humans, dogs and trees are living things. | Animals eat food, drink water and breathe air.</em></p>
+
+      <h4>2. What are Non-Living Things? (O que são Seres Não-Vivos?)</h4>
+      <p>Os <strong>non-living things</strong> (seres não-vivos) são objetos ou elementos que <strong>não têm vida</strong>. Eles <strong>do not grow</strong> (não crescem), <strong>do not breathe</strong> (não respiram), <strong>do not eat</strong> (não comem) e <strong>do not reproduce</strong> (não têm filhotes).</p>
+      <p>Podemos dividir os seres não-vivos em dois tipos:</p>
+      <p>• <strong>Man-made non-living things</strong> (coisas não-vivas feitas pelo homem): Objetos construídos por pessoas, como <strong>cars</strong> (carros), <strong>toys</strong> (brinquedos), <strong>chairs</strong> (cadeiras), <strong>balls</strong> (bolas) e <strong>robots</strong> (robôs).</p>
+      <p>• <strong>Natural non-living things</strong> (coisas não-vivas naturais): Elementos que existem na natureza, mas não têm vida, como <strong>rocks</strong> (pedras/rochas), <strong>sun</strong> (sol), <strong>water</strong> (água) e <strong>air</strong> (ar).</p>
+      <p><em>Frases de exemplo: Rocks, toys and cars are non-living things. | A toy car moves with batteries, but it does not breathe or grow.</em></p>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+      <button class="btn" onclick="startQuiz()">Start Quiz!</button>
+    </div>
+  </div>
+
+  <!-- TELA DO QUIZ: TEXTO DE REFERÊNCIA PERMANECE NO TOPO DE TODAS AS QUESTÕES -->
+  <div id="quiz-screen" style="display: none;">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- CAIXA DE TEXTO FIXA NO TOPO DE TODAS AS QUESTÕES -->
+    <div class="ref-text-box" id="ref-box">
+      <h3>Living and Non-Living Things (Seres Vivos e Não-Vivos)</h3>
+      <p>No nosso mundo, tudo o que nos cerca pode ser dividido em dois grupos: <strong>living things</strong> (seres vivos) e <strong>non-living things</strong> (seres não-vivos).</p>
+      
+      <h4>1. Living Things (Seres Vivos)</h4>
+      <p>Organismos com vida que precisam de <strong>water</strong> (água), <strong>food</strong> (comida) e <strong>air</strong> (ar). Eles podem <strong>grow</strong> (crescer), <strong>breathe</strong> (respirar), <strong>move</strong> (mover-se) e <strong>reproduce</strong> (ter filhotes).<br>
+      <em>Exemplos: <strong>animals</strong> (animais), <strong>plants</strong> (plantas), <strong>humans</strong> (pessoas).</em></p>
+
+      <h4>2. Non-Living Things (Seres Não-Vivos)</h4>
+      <p>Coisas sem vida. Eles <strong>do not grow</strong> (não crescem), <strong>do not breathe</strong> (não respiram) e <strong>do not eat</strong> (não comem).<br>
+      • <strong>Man-made</strong> (feitos pelo homem): <strong>cars</strong> (carros), <strong>toys</strong> (brinquedos), <strong>chairs</strong> (cadeiras), <strong>robots</strong> (robôs).<br>
+      • <strong>Natural non-living</strong> (naturais sem vida): <strong>rocks</strong> (pedras), <strong>sun</strong> (sol), <strong>water</strong> (água).</p>
+    </div>
+
+    <h2 id="question-number">Question 1</h2>
+    <p id="question-text" style="font-size: 1.15rem; margin: 15px 0; font-weight: 700; text-align: center; color: #f8f9fa;"></p>
+
+    <div class="options-grid" id="options-container"></div>
+
+    <div style="text-align: center; margin-top: 15px;">
+      <button class="btn" id="check-btn" onclick="checkAnswer()">Check</button>
+    </div>
+
+    <div class="feedback-box" id="feedback-box"></div>
+
+    <div class="nav-actions">
+      <button class="btn" id="prev-btn" style="background: #334155; border-color: #64748b;" onclick="prevQuestion()">Previous</button>
+      <button class="btn" id="next-btn" style="background: #334155; border-color: #64748b;" onclick="nextQuestion()">Next</button>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="result-screen" style="display: none; text-align: center;">
+    <h2 style="font-size: 2rem; color: #38bdf8;">Quiz Completed!</h2>
+    
+    <div style="margin: 20px 0;">
+      <p style="font-size: 1.2rem; color: #94a3b8;">Sua Nota Final:</p>
+      <div style="font-size: 3.5rem; font-family: 'Fredoka', sans-serif; color: #22c55e; margin: 10px 0;" id="final-grade">10.0</div>
+      <p style="font-size: 1.1rem;" id="score-details"></p>
+    </div>
+
+    <div class="report-card" id="report-card">
+      <h3>📋 Relatório de Desempenho e Foco de Estudo</h3>
+      <div id="report-content"></div>
+    </div>
+
+    <div style="margin-top: 25px;">
+      <button class="btn" onclick="restartQuiz()">Restart Quiz</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 30 Questões Objetivas com alternância rígida de opções
+  const questions = [
+    {
+      category: 'conceito_vivo',
+      q: "1. What is a 'living thing'?",
+      options: ["A man-made toy", "A car that moves with gas", "An organism that has life", "A rock found in the river"],
+      correct: 2, // C
+      explain: "No texto: <strong>living things</strong> significa seres vivos.<br>Tradução: <em>'Um organismo que tem vida'</em>.<br>Explicação: Seres vivos são organismos que possuem vida."
+    },
+    {
+      category: 'necessidades',
+      q: "2. What do all living things need to survive?",
+      options: ["Water, food, and air", "Batteries and electricity", "Plastic and metal", "Only sunlight"],
+      correct: 0, // A
+      explain: "No texto: <strong>water</strong> (água), <strong>food</strong> (comida) e <strong>air</strong> (ar).<br>Tradução: <em>'Água, comida e ar'</em>.<br>Explicação: Todos os seres vivos precisam dessas três necessidades básicas."
+    },
+    {
+      category: 'exemplos_vivos',
+      q: "3. Which of the following is a living thing?",
+      options: ["A stone", "A tree", "A chair", "A bicycle"],
+      correct: 1, // B
+      explain: "No texto: <strong>plants</strong> (plantas/árvores) são seres vivos.<br>Tradução: <em>'Uma árvore'</em>.<br>Explicação: A árvore (tree) é uma planta viva."
+    },
+    {
+      category: 'funcoes_vivas',
+      q: "4. Complete the sentence: 'Puppies eat food and ______ big.'",
+      options: ["stop", "melt", "break", "grow"],
+      correct: 3, // D
+      explain: "No texto: <strong>grow</strong> significa crescer.<br>Tradução: <em>'Filhotes comem comida e crescem (grow) grandes'</em>.<br>Explicação: O verbo <strong>grow</strong> indica crescimento."
+    },
+    {
+      category: 'funcoes_vivas',
+      q: "5. What does the word 'breathe' mean in Portuguese?",
+      options: ["Comer", "Respirar", "Crescer", "Nadar"],
+      correct: 1, // B
+      explain: "Vocabulário: <strong>breathe</strong>.<br>Tradução: <em>'Respirar'</em>.<br>Explicação: Animals breathe air = Animais respiram ar."
+    },
+    {
+      category: 'funcoes_vivas',
+      q: "6. Which action shows that a bird is a living thing?",
+      options: ["It flies and moves by itself", "It rusts in the rain", "It needs batteries", "It stays the same size forever"],
+      correct: 0, // A
+      explain: "No texto: <strong>move</strong> significa mover-se.<br>Tradução: <em>'Ele voa e se move por si mesmo'</em>.<br>Explicação: Seres vivos movem-se por si próprios."
+    },
+    {
+      category: 'conceito_naovivo',
+      q: "7. What does 'non-living thing' mean?",
+      options: ["Um animal selvagem", "Um objeto ou ser sem vida", "Uma planta alta", "Um bebê cachorro"],
+      correct: 1, // B
+      explain: "Vocabulário: <strong>non-living thing</strong>.<br>Tradução: <em>'Ser / Coisa não-viva'</em>.<br>Explicação: Refere-se a objetos ou elementos sem vida."
+    },
+    {
+      category: 'caracteristicas_naovivo',
+      q: "8. Do non-living things need to eat food?",
+      options: ["Yes, every morning", "Yes, they eat grass", "No, they do not eat food", "Only when it rains"],
+      correct: 2, // C
+      explain: "No texto: <strong>do not eat</strong> significa não comem.<br>Tradução: <em>'Não, eles não comem comida'</em>.<br>Explicação: Seres não-vivos não precisam de alimento."
+    },
+    {
+      category: 'exemplos_naovivo',
+      q: "9. Which item is a non-living thing?",
+      options: ["A plastic toy car", "A goldfish", "A green leaf", "A butterfly"],
+      correct: 0, // A
+      explain: "No texto: <strong>toys</strong> (brinquedos) são não-vivos.<br>Tradução: <em>'Um carrinho de brinquedo de plástico'</em>.<br>Explicação: Brinquedos de plástico não têm vida."
+    },
+    {
+      category: 'man_made',
+      q: "10. What does 'man-made' mean?",
+      options: ["Feito pela natureza", "Criado por animais", "Feito pelo homem / construído", "Que cresce na terra"],
+      correct: 2, // C
+      explain: "Vocabulário: <strong>man-made</strong>.<br>Tradução: <em>'Feito pelo homem / construído'</em>.<br>Explicação: Objeto fabricado por seres humanos."
+    },
+    {
+      category: 'man_made',
+      q: "11. Which object is a man-made non-living thing?",
+      options: ["The sun", "A wooden chair", "A river", "A mountain"],
+      correct: 1, // B
+      explain: "No texto: <strong>chairs</strong> (cadeiras) são man-made.<br>Tradução: <em>'Uma cadeira de madeira'</em>.<br>Explicação: Cadeiras são construídas por pessoas."
+    },
+    {
+      category: 'natural_nonliving',
+      q: "12. The sun and water are examples of...",
+      options: ["Living animals", "Man-made toys", "Natural non-living things", "Plants that breathe"],
+      correct: 2, // C
+      explain: "No texto: <strong>natural non-living</strong>.<br>Tradução: <em>'Coisas não-vivas naturais'</em>.<br>Explicação: A água e o sol existem na natureza, mas não têm vida."
+    },
+    {
+      category: 'comparacao',
+      q: "13. A robot can move and talk with batteries. Is it a living thing?",
+      options: ["Yes, because it walks", "No, because it does not breathe or grow", "Yes, because it speaks English", "Yes, it is a metal animal"],
+      correct: 1, // B
+      explain: "No texto: Robôs são <strong>non-living</strong>.<br>Tradução: <em>'Não, porque ele não respira nem cresce'</em>.<br>Explicação: Funcionar com pilhas não torna um objeto um ser vivo."
+    },
+    {
+      category: 'comparacao',
+      q: "14. Why is a cat classified as a living thing?",
+      options: ["Because it is made of plastic", "Because it stays small forever", "Because it breathes, eats, and grows", "Because it runs with batteries"],
+      correct: 2, // C
+      explain: "No texto: <strong>breathe, eat, grow</strong>.<br>Tradução: <em>'Porque ele respira, come e cresce'</em>.<br>Explicação: O gato possui todas as funções dos seres vivos."
+    },
+    {
+      category: 'frases_simples',
+      q: "15. Select the correct English sentence:",
+      options: ["Rocks eat food every day.", "Plants need water and light to grow.", "Cars breathe oxygen.", "Toys reproduce baby toys."],
+      correct: 1, // B
+      explain: "Frase correta: <strong>'Plants need water and light to grow'</strong>.<br>Tradução: <em>'Plantas precisam de água e luz para crescer'</em>."
+    },
+    {
+      category: 'vocabulario',
+      q: "16. What is the English word for 'animais'?",
+      options: ["Plants", "Humans", "Animals", "Rocks"],
+      correct: 2, // C
+      explain: "Vocabulário: <strong>animals</strong> = animais."
+    },
+    {
+      category: 'vocabulario',
+      q: "17. What is the English word for 'crescer'?",
+      options: ["Grow", "Eat", "Move", "Sleep"],
+      correct: 0, // A
+      explain: "Vocabulário: <strong>grow</strong> = crescer."
+    },
+    {
+      category: 'vocabulario',
+      q: "18. What does 'do not breathe' mean?",
+      options: ["Não comem", "Não respiram", "Não andam", "Não bebem"],
+      correct: 1, // B
+      explain: "Vocabulário: <strong>do not breathe</strong> = não respiram."
+    },
+    {
+      category: 'exemplos_naovivo',
+      q: "19. Which of these is a NATURAL non-living thing?",
+      options: ["A smartphone", "A rock", "A school bus", "A pencil"],
+      correct: 1, // B
+      explain: "No texto: <strong>rocks</strong> são elementos não-vivos da natureza."
+    },
+    {
+      category: 'frases_simples',
+      q: "20. Complete: 'Birds are living things because they ______ air.'",
+      options: ["drink", "breathe", "paint", "wash"],
+      correct: 1, // B
+      explain: "No texto: <strong>breathe air</strong> (respiram ar)."
+    },
+    {
+      category: 'funcoes_vivas',
+      q: "21. What does 'reproduce' mean for living things?",
+      options: ["To play games", "To make new baby living things", "To turn into stone", "To stop moving"],
+      correct: 1, // B
+      explain: "Vocabulário: <strong>reproduce</strong> = reproduzir-se / ter filhotes."
+    },
+    {
+      category: 'exemplos_naovivo',
+      q: "22. Is water a living thing?",
+      options: ["Yes, water eats fish", "No, water is a natural non-living thing", "Yes, water breathes air", "Yes, water grows legs"],
+      correct: 1, // B
+      explain: "No texto: A água (<strong>water</strong>) é um elemento não-vivo natural."
+    },
+    {
+      category: 'man_made',
+      q: "23. Which item is MAN-MADE?",
+      options: ["A red apple on a tree", "A plastic ball", "A wild river", "A cloud in the sky"],
+      correct: 1, // B
+      explain: "No texto: <strong>balls</strong> de plástico são feitas pelo homem (man-made)."
+    },
+    {
+      category: 'comparacao',
+      q: "24. Why is a seed considered a living thing?",
+      options: ["Because it can grow into a plant", "Because it is made of metal", "Because it uses batteries", "Because it never changes"],
+      correct: 0, // A
+      explain: "Explicação: A semente (seed) pode germinar e <strong>grow</strong> (crescer)."
+    },
+    {
+      category: 'necessidades',
+      q: "25. What happens if a plant receives NO water and NO light?",
+      options: ["It grows faster", "It dies because it is a living thing", "It turns into a robot", "It reproduces immediately"],
+      correct: 1, // B
+      explain: "Explicação: Seres vivos precisam de água e luz para sobreviver."
+    },
+    {
+      category: 'vocabulario',
+      q: "26. What is the English word for 'comida / alimento'?",
+      options: ["Air", "Water", "Food", "Shelter"],
+      correct: 2, // C
+      explain: "Vocabulário: <strong>food</strong> = comida / alimento."
+    },
+    {
+      category: 'vocabulario',
+      q: "27. What is the opposite of 'living thing'?",
+      options: ["Big thing", "Non-living thing", "Fast animal", "Green plant"],
+      correct: 1, // B
+      explain: "Vocabulário: O oposto de ser vivo é <strong>non-living thing</strong>."
+    },
+    {
+      category: 'frases_simples',
+      q: "28. Complete: 'The sun gives light, but it does not ______.'",
+      options: ["shine", "breathe", "exist", "stay in space"],
+      correct: 1, // B
+      explain: "No texto: O sol é não-vivo, logo ele não respira (<strong>does not breathe</strong>)."
+    },
+    {
+      category: 'comparacao',
+      q: "29. Which group contains ONLY living things?",
+      options: ["Dog, Rose plant, Human", "Car, Dog, Rock", "Doll, Water, Tree", "Cat, Chair, Sun"],
+      correct: 0, // A
+      explain: "Grupo correto: <strong>Dog, Rose plant, Human</strong> (Cachorro, Roseira e Humano são todos vivos)."
+    },
+    {
+      category: 'comparacao',
+      q: "30. Which group contains ONLY non-living things?",
+      options: ["Bird, Fish, Frog", "Rock, Chair, Toy car", "Tree, Grass, Flower", "Child, Baby, Teacher"],
+      correct: 1, // B
+      explain: "Grupo correto: <strong>Rock, Chair, Toy car</strong> (Pedra, Cadeira e Carrinho são não-vivos)."
+    }
+  ];
+
+  let currentQ = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+
+  function toggleMenu() {
+    document.getElementById('drawer').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+  }
+
+  function renderMenu() {
+    const grid = document.getElementById('menu-grid');
+    grid.innerHTML = '';
+    questions.forEach((_, idx) => {
+      const item = document.createElement('div');
+      item.className = 'grid-item' + (userAnswers[idx] !== null ? ' answered' : '');
+      item.innerText = idx + 1;
+      item.onclick = () => {
+        currentQ = idx;
+        loadQuestion();
+        toggleMenu();
+      };
+      grid.appendChild(item);
+    });
+  }
+
+  function startQuiz() {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('quiz-screen').style.display = 'block';
+    renderMenu();
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    const q = questions[currentQ];
+
+    document.getElementById('question-number').innerText = `Question ${currentQ + 1} of ${questions.length}`;
+    document.getElementById('question-text').innerText = q.q;
+    document.getElementById('tracker-text').innerText = `Q${currentQ + 1} / 30`;
+    
+    const pct = ((currentQ + 1) / questions.length) * 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    
+    const feedbackBox = document.getElementById('feedback-box');
+    feedbackBox.style.display = 'none';
+
+    document.getElementById('check-btn').disabled = false;
+    document.getElementById('prev-btn').disabled = currentQ === 0;
+
+    q.options.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerText = opt;
+      if (userAnswers[currentQ] === idx) {
+        btn.classList.add('selected');
+      }
+      btn.onclick = () => selectOption(idx);
+      container.appendChild(btn);
+    });
+
+    if (userAnswers[currentQ] !== null) {
+      showAnswerState();
+    }
+  }
+
+  function selectOption(idx) {
+    userAnswers[currentQ] = idx;
+    renderMenu();
+    const btns = document.querySelectorAll('.option-btn');
+    btns.forEach((b, i) => {
+      b.classList.toggle('selected', i === idx);
+    });
+  }
+
+  function checkAnswer() {
+    if (userAnswers[currentQ] === null) return;
+    showAnswerState();
+  }
+
+  function showAnswerState() {
+    const q = questions[currentQ];
+    const selected = userAnswers[currentQ];
+    const btns = document.querySelectorAll('.option-btn');
+    const feedbackBox = document.getElementById('feedback-box');
+
+    btns.forEach((btn, idx) => {
+      btn.onclick = null;
+      if (idx === q.correct) {
+        btn.classList.add('correct');
+      } else if (idx === selected) {
+        btn.classList.add('wrong');
+      }
+    });
+
+    if (selected === q.correct) {
+      feedbackBox.style.background = '#14532d';
+      feedbackBox.style.color = '#ffffff';
+      feedbackBox.innerHTML = '✔ <strong>Correto! Excellent job!</strong><br><br>' + q.explain;
+      confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
+    } else {
+      feedbackBox.style.background = '#7f1d1d';
+      feedbackBox.style.color = '#ffffff';
+      feedbackBox.innerHTML = '✖ <strong>Incorreto / Ops!</strong><br><br>' + q.explain;
+    }
+
+    feedbackBox.style.display = 'block';
+    document.getElementById('check-btn').disabled = true;
+  }
+
+  function nextQuestion() {
+    if (currentQ < questions.length - 1) {
+      currentQ++;
+      loadQuestion();
+    } else {
+      finishQuiz();
+    }
+  }
+
+  function prevQuestion() {
+    if (currentQ > 0) {
+      currentQ--;
+      loadQuestion();
+    }
+  }
+
+  function finishQuiz() {
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    
+    let correctCount = 0;
+    let errorsByCategory = {
+      conceito_vivo: 0,
+      necessidades: 0,
+      funcoes_vivas: 0,
+      conceito_naovivo: 0,
+      man_made: 0,
+      natural_nonliving: 0,
+      comparacao: 0,
+      vocabulario: 0
+    };
+
+    questions.forEach((q, idx) => {
+      if (userAnswers[idx] === q.correct) {
+        correctCount++;
+      } else {
+        if (errorsByCategory[q.category] !== undefined) {
+          errorsByCategory[q.category]++;
+        }
+      }
+    });
+
+    const grade = ((correctCount / questions.length) * 10).toFixed(1);
+    const gradeElem = document.getElementById('final-grade');
+    gradeElem.innerText = grade;
+
+    if (grade >= 7.0) {
+      gradeElem.style.color = "#22c55e";
+    } else if (grade >= 5.0) {
+      gradeElem.style.color = "#eab308";
+    } else {
+      gradeElem.style.color = "#ef4444";
+    }
+
+    document.getElementById('score-details').innerHTML = `Você acertou <strong>${correctCount}</strong> de <strong>${questions.length}</strong> questões.`;
+
+    const reportContent = document.getElementById('report-content');
+    let totalErrors = questions.length - correctCount;
+    let htmlReport = '';
+
+    if (totalErrors === 0) {
+      htmlReport = `<p style="color: #4ade80;"><strong>Sensacional! Desempenho Perfeito! 🎉</strong><br>Você dominou 100% dos conceitos de Seres Vivos e Não-Vivos. Está preparado para tirar 10 na prova!</p>`;
+    } else {
+      htmlReport = `<p>Com base nos seus erros nesta atividade, aqui estão os tópicos que você deve <strong>revisar no texto explicativo</strong>:</p><ul>`;
+
+      if (errorsByCategory.conceito_vivo > 0 || errorsByCategory.necessidades > 0) {
+        htmlReport += `<li><strong>Necessidades dos Seres Vivos:</strong> Lembre que todos os <em>living things</em> precisam de <strong>water</strong> (água), <strong>food</strong> (comida) e <strong>air</strong> (ar).</li>`;
+      }
+      if (errorsByCategory.funcoes_vivas > 0) {
+        htmlReport += `<li><strong>Características Vivas (Actions):</strong> Revise os verbos <strong>grow</strong> (crescer), <strong>breathe</strong> (respirar), <strong>move</strong> (mover-se) e <strong>reproduce</strong> (reproduzir-se).</li>`;
+      }
+      if (errorsByCategory.man_made > 0 || errorsByCategory.natural_nonliving > 0) {
+        htmlReport += `<li><strong>Man-Made vs. Natural Non-Living:</strong> Treine diferenciar objetos feitos pelo homem (<em>cars, toys, chairs</em>) de elementos não-vivos da natureza (<em>rocks, sun, water</em>).</li>`;
+      }
+      if (errorsByCategory.comparacao > 0) {
+        htmlReport += `<li><strong>Diferenciação (Living vs. Non-Living):</strong> Lembre que robôs ou brinquedos a pilha NÃO são seres vivos porque não respiram nem crescem de verdade.</li>`;
+      }
+      if (errorsByCategory.vocabulario > 0) {
+        htmlReport += `<li><strong>Vocabulário em Inglês:</strong> Repasse as palavras-chave (<em>living, non-living, air, water, food, plants, animals</em>).</li>`;
+      }
+
+      htmlReport += `</ul>`;
+    }
+
+    reportContent.innerHTML = htmlReport;
+
+    confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+  }
+
+  function restartQuiz() {
+    userAnswers.fill(null);
+    currentQ = 0;
+    document.getElementById('result-screen').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
